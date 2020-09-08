@@ -1,0 +1,45 @@
+(*<*)
+theory hw13tmpl
+imports Main
+begin
+(*>*)
+
+text \<open>\Homework{Amortized Complexity}{13.07.2018}
+
+  This is an old exam question, which we have converted to a homework to
+  be done with Isabelle!
+\<close>
+
+text \<open>A ``stack with multipop'' is a list with the following two interface functions:\<close>
+
+fun push :: "'a \<Rightarrow> 'a list \<Rightarrow> 'a list" where
+"push x xs = x # xs"
+
+fun pop :: "nat \<Rightarrow> 'a list \<Rightarrow> 'a list" where
+"pop n xs = drop n xs"
+
+text \<open>You may assume\<close>
+
+definition t_push :: "'a \<Rightarrow> 'a list \<Rightarrow> nat" where
+"t_push x xs = 1"
+
+definition t_pop :: "nat \<Rightarrow> 'a list \<Rightarrow> nat" where
+"t_pop n xs = min n (length xs)"
+
+text \<open>Use the potential method to show that
+the amortized complexity of \<open>push\<close> and \<open>pop\<close> is constant.
+
+Provide complete proofs in Isabelle!
+
+
+
+Original text here was:
+\emph{
+If you need any properties of the auxiliary functions \<open>length\<close>, \<open>drop\<close> and \<open>min\<close>,
+you should state them but you do not need to prove them.}\<close>
+
+(*<*)
+end
+(*>*)
+
+

@@ -1,0 +1,129 @@
+(*<*)
+theory hw07
+  imports Main
+begin
+(*>*)
+
+hide_const (open) inv (*inv is used as a constant in isabelle, renaming it pretty prints the const 
+with the long name if the const is not hidden*)
+
+type_synonym intervals = "(nat*nat) list"
+
+fun inv' :: "nat \<Rightarrow> intervals \<Rightarrow> bool" where
+  "inv' n [] \<longleftrightarrow> True"|
+  "inv' n ((a,b)#ivs) \<longleftrightarrow> n\<le>a \<and> a\<le>b \<and> inv' (b+2) ivs"
+
+definition inv where "inv = inv' 0"
+
+
+fun set_of :: "intervals => nat set"
+where
+  "set_of [] = {}"|
+  "set_of ((a,b)#ivs) = {a..b} \<union> set_of ivs"
+
+
+fun del :: "nat \<Rightarrow> intervals \<Rightarrow> intervals"
+  where
+   "del x [] = []"
+|  "del x ((a,b)#lis) = (
+    if (x < a) then (a,b)#lis
+    else if (x = a \<and> x = b) then lis
+    else if (x = a) then ((a+1), b)#lis
+    else if (x < b) then (a,x-1)#(x+1,b)#lis
+    else if (x = b) then (a,b-1)#lis
+    else (a,b)#(del x lis))"
+
+value "del (12::nat) [(2,5),(7,7),(9,11)]"
+value "set_of [] - {1::nat}"
+
+lemma del_pres_inv: "n\<le>x \<Longrightarrow> inv' n itl \<Longrightarrow> inv' n (del x itl)"
+proof (induction itl arbitrary:n)
+  case Nil
+  then show ?case by auto
+next
+  case (Cons a itl)
+  then show ?case
+    apply (cases a)
+    apply (cases itl)
+    apply auto
+    done
+qed
+
+lemma set_of_del:
+  assumes "n\<le>x"
+  assumes "inv' n itl"
+  shows "set_of (del x itl) =  set_of itl - {x}"
+  using assms
+proof (induction itl arbitrary:n)
+case Nil
+  then show ?case by auto
+next
+  case (Cons a itl)
+  then show ?case 
+    apply (cases a)
+    apply (cases itl)
+     apply (auto split: if_splits)
+    apply (auto)
+    done
+qed
+
+
+lemma del_correct:
+  assumes "inv itl"
+  shows "inv (del x itl)" "set_of (del x itl) =  (set_of itl) - {x}"
+  using assms del_pres_inv hw07.inv_def apply fastforce
+  using assms hw07.inv_def set_of_del by fastforce
+
+
+
+text \<open> \NumHomework{Addition of Interval to Interval List}{June 1}
+  For 3 \<^bold>\<open>bonus points\<close>, implement and prove correct a function
+  to add a whole interval to an interval list. The runtime must
+  not depend on the size of the interval, e.g., iterating over the
+  interval and adding the elements separately is not allowed!
+\<close>
+fun merge_aux where
+  "merge_aux a j [] = [(a,j)]"|
+  "merge_aux a j ((c,d)#ivs) = (
+    if (j+1 \<ge> c \<and> j+1 \<le> d) then (a,d)#ivs
+    else if (j+1 < c) then ((a,j)#(c,d)#ivs)
+    else merge_aux a j ivs)"
+
+fun addi :: "nat \<Rightarrow> nat \<Rightarrow> intervals \<Rightarrow> intervals"
+where
+  "addi i j [] = [(i,j)]"
+| "addi i j ((a,b)#lis) = (
+  if (j+1 < a) then (i,j)#(a,b)#lis
+  else if (i < a \<and> j+1 \<ge> a \<and> j+1 < b) then (i,b)#lis
+  else if (i \<ge> a \<and> j \<le> b) then (a,b)#lis
+  else if (j+1 \<ge> b \<and> i \<le> b+1) then merge_aux (min a i) j lis
+  else (a,b)#(addi i j lis))"
+
+value "addi 5 99 [(2,5),(7,7),(9,11)]"
+
+lemma addi_pres_inv: "n\<le>i \<Longrightarrow> i\<le>j \<Longrightarrow> inv' n itl \<Longrightarrow> inv' n (addi i j itl)"
+proof (induction itl arbitrary:n)
+  case Nil
+  then show ?case by auto
+next
+  case (Cons a itl)
+  then show ?case
+    apply (cases a)
+    apply (cases itl)
+     apply auto
+         apply linarith
+        apply linarith
+       apply (smt Suc_leD min.left_commute min_def)
+    using Cons.prems(2) min_le_iff_disj apply blast
+     apply linarith
+qed
+
+lemma addi_correct:
+  assumes "inv is" "i\<le>j"
+  shows "inv (addi i j is)" "set_of (addi i j is) = {i..j} \<union> (set_of is)"
+  sorry
+
+
+(*<*)
+end
+(*>*)

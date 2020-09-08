@@ -1,0 +1,96 @@
+theory UnionFind
+  imports Main
+begin
+
+definition "init n = [0..<n]"
+definition "pred ls i = ls!i"
+definition "is_root ls i \<longleftrightarrow> pred ls i = i"
+
+function (domintros) root_of where
+  "root_of ls i = (if is_root ls i then i else root_of ls (ls!i))"
+   apply auto[1]
+  by blast
+
+thm "root_of.psimps"
+thm "root_of.pinduct"
+
+definition "invar ls \<equiv>  \<forall>i<length ls. ls!i<length ls \<and> root_of_dom (ls,i)"
+
+lemma is_root_corr : "ls!i = i \<Longrightarrow> is_root ls i"
+  apply(subst is_root_def)
+  apply(subst pred_def)
+  by simp
+
+lemma init_corr : "\<forall>i\<in> set(init n). (is_root (init n) i)"
+  apply(subst is_root_def)
+  apply(auto)
+  by (simp add: pred_def init_def)
+  
+
+lemma root_of_base: "is_root ls i \<Longrightarrow> root_of ls i = i"
+  apply(subst root_of.psimps)
+   apply(auto)
+  using root_of.domintros by blast
+
+
+lemma root_of_step: " \<lbrakk> invar ls; i < length ls; ls!i \<noteq> i \<rbrakk>  \<Longrightarrow> root_of ls i = root_of ls (ls!i)"
+  apply(subst root_of.psimps)
+  apply (simp add: invar_def)
+  by (simp add: pred_def is_root_def)
+  
+
+lemma invar_init: "invar (init n)"
+  apply(subst init_def)
+  apply(subst invar_def)
+  apply(auto)
+  using is_root_corr root_of.domintros by fastforce
+
+lemma all_have_root: "invar ls \<Longrightarrow> i < length ls \<Longrightarrow> root_of ls i < length ls"
+  oops
+  
+definition union where "union i j ls = ls[root_of ls i := root_of ls j]"
+
+type_synonym eqcs = "nat \<Rightarrow> nat set"
+
+definition \<alpha> :: "nat list \<Rightarrow> eqcs" where "\<alpha> ls i = 
+  (if i<length ls then {j. j<length ls \<and> root_of ls j = root_of ls i} else {i})"
+
+definition union_eqc :: "nat \<Rightarrow> nat \<Rightarrow> eqcs \<Rightarrow> eqcs"
+  where
+  "union_eqc x y eqc i = (if i \<in> eqc x \<union> eqc y then eqc x \<union> eqc y else eqc i)"
+
+lemma "\<alpha> (init n) i = {i}"
+  apply (auto simp add: init_def \<alpha>_def)
+  using is_root_corr root_of_base by auto
+
+lemma length_same : "length ls = length (union a b ls)"
+  by (simp add: union_def)
+
+
+lemma length_fixed : "\<lbrakk>invar ls ; x < length ls ; y < length ls ; i < length ls \<rbrakk> \<Longrightarrow> union x y ls ! i < length (union x y ls)"
+  apply(simp add: union_def)
+  apply(subst root_of.psimps)
+   apply(auto)
+  using invar_def apply auto[1]
+  
+  oops
+
+lemma 
+  assumes "invar ls" "x<length ls" "y<length ls"
+  shows "\<alpha> (union x y ls) = union_eqc x y (\<alpha> ls)"
+  oops
+  
+
+lemma 
+  assumes "invar ls" "x<length ls" "y<length ls"
+  shows "invar (union x y ls)"
+  unfolding invar_def
+proof(intro allI)
+  fix i
+  have "union x y ls ! i < length (union x y ls)" using assms
+    oops
+
+
+  
+
+end

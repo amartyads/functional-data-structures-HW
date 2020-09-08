@@ -1,0 +1,26 @@
+lemma min_corr: "avl t \<Longrightarrow> height t = h \<Longrightarrow> avl_minnodes_height h  \<le> size1 t"
+proof(induction t arbitrary:h)
+  case Leaf
+  then show ?case by auto
+next
+  case (Node t1 x2 t2)
+
+  note IH = Node.IH[OF _ refl]
+  then have ?case using IH
+      using Node.prems(1) Suc_eq_plus1 avl_size by force
+  have "height t1 = height t2 \<or> height t1 < height t2 \<or> height t1 > height t2" (is "?C1 \<or> ?C2 \<or> ?C3")
+    by auto
+  moreover {
+    assume ?C1 
+   (* have "h = Suc (height t1)" using Node.prems(2) \<open>height t1 = height t2\<close> by force*)
+    then have ?case using IH
+      using Node.prems(1) Suc_eq_plus1 avl_size by force
+  } moreover {
+    assume ?C2 have ?case sorry
+  } moreover {
+    assume ?C3 have ?case sorry
+  } ultimately show ?case by blast
+
+
+  then show ?case 
+qed

@@ -1,0 +1,35 @@
+(*<*)
+theory hw10_2_tmpl
+imports Trie1 "HOL-Library.List_lexord"
+begin
+(*>*)
+
+text \<open>\NumHomework{Enumeration of Keys in Tries}{22.~6.~2018}
+
+  Write a function that enumerates all keys in a trie, in lexicographic order!
+  Prove it correct.
+\<close>
+
+
+  fun enum :: "trie \<Rightarrow> bool list list"
+  where
+    "enum _ = undefined"
+
+
+  lemma enum_correct:
+    "set (enum t) = { xs. isin t xs }" and "sorted_wrt op< (enum t)"
+    oops
+
+text \<open>
+  Note that Booleans are ordered by \<open>False < True\<close>, and
+  that we imported @{theory "List_lexord"}, which defines
+  a lexicographic ordering on lists, if the elements are ordered.
+\<close>
+
+value "[True,True,False] < [True,True,True,True]"
+
+
+
+(*<*)
+end
+(*>*)

@@ -1,0 +1,24 @@
+(*<*)
+theory ex09tmpl
+  imports Main "HOL-Data_Structures.RBT_Set"
+begin
+(*>*)
+
+
+text {* \ExerciseSheet{9}{8.~6.~2018} *}
+
+text \<open>\Exercise{Indicate Unchanged by Option}
+
+  Write an insert function for red-black trees that either inserts the element
+  and returns a new tree, or returns None if the element was already in the tree
+\<close>
+
+fun ins' :: "'a::linorder \<Rightarrow> 'a rbt \<Rightarrow> 'a rbt option"
+where
+"ins' _ _ = undefined"
+
+lemma "invc t \<Longrightarrow> case ins' x t of None \<Rightarrow> ins x t = t | Some t' \<Rightarrow> ins x t = t'"
+  sorry
+(*<*)
+end
+(*>*)

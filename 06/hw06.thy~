@@ -1,0 +1,31 @@
+theory hw06
+  imports Main 
+begin
+
+fun funky::"int \<Rightarrow> int" where
+ "funky k = (k - 3)^2"
+
+value "sort_key funky [(2::int), 1, 3, 4]"
+
+find_theorems "insort"
+
+lemma "[x\<leftarrow>sort_key k xs. k x = a] = [x\<leftarrow>xs. k x = a]"
+  apply(induction xs)
+   apply(auto simp: sort_key_def filter_sort filter_insort_triv)
+  sorry
+
+fun quickselect :: "'a::linorder list \<Rightarrow> nat \<Rightarrow> 'a" where
+  "quickselect (x#xs) k = (let
+    xs1 = [y\<leftarrow>xs. y<x];
+    xs2 = [y\<leftarrow>xs. \<not>(y<x)]
+  in
+    if k<length xs1 then quickselect xs1 k
+    else if k=length xs1 then x
+    else quickselect xs2 (k-length xs1-1)
+  )"
+| "quickselect [] _ = undefined"
+
+find_theorems "sort"
+
+
+end
